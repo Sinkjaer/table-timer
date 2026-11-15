@@ -1,6 +1,6 @@
 // Offline cache so the timer opens at the table without a connection.
 // Bump VERSION after changing index.html so phones pick up the new copy.
-const VERSION = 'table-timer-v2';
+const VERSION = 'table-timer-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

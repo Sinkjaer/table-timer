@@ -84,8 +84,8 @@ dialog{touch-action:manipulation;overscroll-behavior:contain}
 .ctrl{display:flex;flex-direction:column;align-items:center;gap:6px;font:600 11px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:#e9d3a3;white-space:nowrap}
 #stage.narrow .ctrls{gap:12px}
 #stage.narrow .tok.mid{width:56px;height:56px}
-#stage.narrow .tok.big{width:72px;height:72px}
-#stage.narrow .tok.big svg{width:36px;height:36px}
+#stage.narrow .tok.big{width:92px;height:92px}
+#stage.narrow .tok.big svg{width:46px;height:46px}
 .box-top{display:grid;grid-template-columns:36px minmax(0,1fr) 36px;align-items:center;gap:4px;width:100%}
 .box-top .plate{grid-column:2;justify-self:center;white-space:nowrap}
 #stage.narrow .box-top{grid-template-columns:minmax(0,1fr) 36px}
@@ -100,8 +100,14 @@ dialog{touch-action:manipulation;overscroll-behavior:contain}
   box-shadow:0 3px 0 #5a3c12,0 6px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .08s,box-shadow .08s,filter .2s}
 .tok:active{transform:translateY(2px);box-shadow:0 1px 0 #5a3c12,0 3px 6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.55)}
 .tok.mid{width:64px;height:64px}
-.tok.big{width:84px;height:84px}
-.tok svg{width:22px;height:22px}.tok.mid svg{width:30px;height:30px}.tok.big svg{width:42px;height:42px}
+.tok.big{width:104px;height:104px}
+.tok svg{width:22px;height:22px}.tok.mid svg{width:30px;height:30px}.tok.big svg{width:52px;height:52px}
+/* Next wears the colour of the player whose turn it is (or who it will start). */
+#bNext.player-color{color:var(--nink);
+  background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--nc) 50%,#fff) 0%,var(--nc) 52%,color-mix(in srgb,var(--nc) 62%,#000) 100%);
+  box-shadow:0 4px 0 color-mix(in srgb,var(--nc) 45%,#000),0 8px 14px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.45)}
+#bNext.player-color:active{box-shadow:0 1px 0 color-mix(in srgb,var(--nc) 45%,#000),0 3px 6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.45)}
+#bNext.player-color svg{filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 .tok:disabled{filter:grayscale(.85) brightness(.6);cursor:default;transform:none}
 .tok.attention{animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{0%,100%{box-shadow:0 3px 0 #5a3c12,0 0 0 0 rgba(245,218,146,.0)}50%{box-shadow:0 3px 0 #5a3c12,0 0 0 7px rgba(245,218,146,.35)}}
@@ -115,8 +121,12 @@ dialog{touch-action:manipulation;overscroll-behavior:contain}
 #stage.tiny .plate,#stage.tiny .ctrl span{display:none}
 #stage.tiny .box-inner{gap:7px}
 #stage.tiny .tok.mid{width:52px;height:52px}
-#stage.tiny .tok.big{width:66px;height:66px}
-#stage.tiny .tok.big svg{width:34px;height:34px}
+#stage.tiny .tok.big{width:76px;height:76px}
+#stage.tiny .tok.big svg{width:38px;height:38px}
+#stage.xnarrow .ctrls{gap:8px}
+#stage.xnarrow .tok.mid{width:46px;height:46px}
+#stage.xnarrow .tok.big{width:72px;height:72px}
+#stage.xnarrow .tok.big svg{width:36px;height:36px}
 
 /* ---------- players ---------- */
 #players{position:absolute;inset:0;z-index:5;pointer-events:none}
@@ -251,6 +261,7 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
 .row>span:first-child,.row>label:first-child{min-width:0}
 .row-r{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .row input.small{width:84px;flex-shrink:0}
+.row select{min-width:0;max-width:62%;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:500 15px/1.2 var(--f-body)}
 .row input[type=range]{width:min(200px,50%);accent-color:var(--brass)}
 .switch{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:999px;background:#4a3a2c;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;margin:0}
 .switch::before{content:"";position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .2s}
@@ -386,6 +397,9 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
       <label class="row" id="silentRow"><span>Play sounds when iPhone is on silent</span><input type="checkbox" class="switch" id="sSilent"></label>
       <label class="row"><span>Volume</span><input type="range" id="vol" min="0" max="100" step="5"></label>
       <div class="row"><label for="sWhip">Whip crack on a new player</label><span class="row-r"><button type="button" class="test" data-test="whip" aria-label="Play the whip sound"></button><input type="checkbox" class="switch" id="sWhip"></span></div>
+      <div class="row" id="sayRow"><label for="sSay">Say the player's name on their turn</label><span class="row-r"><button type="button" class="test" data-test="say" aria-label="Hear the name announcement"></button><input type="checkbox" class="switch" id="sSay"></span></div>
+      <label class="row" id="voiceRow"><span>Voice</span><select id="voiceSel"></select></label>
+      <p class="hint" id="voiceHint"></p>
       <div class="row"><label for="sWarn">Chime at 60 and 30 seconds left</label><span class="row-r"><button type="button" class="test" data-test="warn" aria-label="Play the warning chimes"></button><input type="checkbox" class="switch" id="sWarn"></span></div>
       <div class="row"><label for="sCount">Tick every second from 10</label><span class="row-r"><button type="button" class="test" data-test="count" aria-label="Play the countdown"></button><input type="checkbox" class="switch" id="sCount"></span></div>
       <div class="row"><label for="sUp">Wrong-answer buzzer at zero</label><span class="row-r"><button type="button" class="test" data-test="up" aria-label="Play the buzzer"></button><input type="checkbox" class="switch" id="sUp"></span></div>
@@ -442,7 +456,12 @@ function fmtLabel(sec){
   if (sec % 60 === 0) return `${sec / 60} min`;
   return fmt(sec);
 }
-function vibrate(p){ try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+function vibrate(p){
+  try {
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+    navigator.vibrate && navigator.vibrate(p);
+  } catch (e) {}
+}
 function initialOf(name){ const ch = [...(name || '').trim()][0]; return ch ? ch.toLocaleUpperCase() : '?'; }
 
 const stage = $('#stage'), layer = $('#players'), box = $('#box'), toastEl = $('#toast');
@@ -453,7 +472,7 @@ let lastTs = Date.now(), lastSaved = 0;
 /* ---------- state ---------- */
 function defaults(){
   return {
-    settings: { mode: 'turn', turnSec: 60, bankSec: 900, incSec: 0, dir: 'cw', sound: true, volume: 0.8, sSilent: true,
+    settings: { mode: 'turn', turnSec: 60, bankSec: 900, incSec: 0, dir: 'cw', sound: true, volume: 0.8, sSilent: true, sSay: true, voiceURI: '',
                 sWhip: true, sWarn: true, sCount: true, sUp: true, facing: true, wake: true },
     players: [], activeId: null, lastId: null, running: false, round: 1, setup: false
   };
@@ -522,7 +541,8 @@ function measure(){
   stage.style.setProperty('--rim', G.rim + 'px');
   const bw = Math.round(clamp(G.tw * 0.84, 150, 300));
   box.style.width = bw + 'px';
-  stage.classList.toggle('narrow', bw < 192);
+  stage.classList.toggle('narrow', bw < 214);
+  stage.classList.toggle('xnarrow', bw < 184);
   fitBox();
   const portrait = G.H > G.W;
   $('#oakNoise').setAttribute('baseFrequency', portrait ? '0.11 0.005' : '0.005 0.11');
@@ -641,6 +661,42 @@ function unlock(){
   const c = audio(); if (!c || unlocked) return;
   unlocked = true;
   try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
+  // iPhone only lets a page speak after it has spoken once inside a tap; say nothing, silently.
+  try { if (TTS) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; TTS.speak(u); } } catch (e) {}
+}
+
+/* ---------- spoken turn announcements ---------- */
+const TTS = 'speechSynthesis' in window ? window.speechSynthesis : null;
+let voices = [], sayTimer = 0;
+function loadVoices(){
+  try { voices = TTS ? TTS.getVoices() : []; } catch (e) { voices = []; }
+  if (document.getElementById('dlgSettings').open) fillVoices();
+}
+if (TTS) {
+  loadVoices();
+  try { TTS.addEventListener('voiceschanged', loadVoices); } catch (e) { TTS.onvoiceschanged = loadVoices; }
+}
+const isZh = v => /^zh/i.test(v.lang || '');
+// The chosen voice, or by default a Mandarin Chinese voice reading the English words.
+function pickVoice(){
+  const want = S.settings.voiceURI;
+  if (want) { const v = voices.find(x => x.voiceURI === want); if (v) return v; }
+  const zh = voices.filter(isZh), cn = zh.filter(v => /zh[-_]CN/i.test(v.lang));
+  // Prefer the standard Mandarin voices (Apple Tingting / Li-Mu / Yu-shu, Google, Microsoft) over novelty ones.
+  const std = /ting|li-?mu|yu-?shu|google|xiaoxiao|huihui|yaoyao|kangkang|yunxi/i;
+  return cn.find(v => std.test(v.name)) || cn.find(v => v.localService) || cn[0] || zh[0] || null;
+}
+function sayTurn(p, force){
+  const s = S.settings;
+  if (!TTS || !p || (!force && (!s.sound || !s.sSay))) return;
+  clearTimeout(sayTimer);
+  try { TTS.cancel(); } catch (e) {}
+  const u = new SpeechSynthesisUtterance(`${p.name}, your turn`);
+  const v = pickVoice();
+  if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'zh-CN';
+  u.volume = Math.min(1, s.volume + 0.15); u.rate = 0.95;
+  // Let the whip crack finish first.
+  sayTimer = setTimeout(() => { try { TTS.speak(u); } catch (e) {} }, force ? 0 : 300);
 }
 function env(t, peak, attack, decay){
   const n = A.ctx.createGain();
@@ -742,7 +798,7 @@ function startTurn(id){
   if (S.settings.mode === 'turn') p.remaining = S.settings.turnSec;
   p.turns++;
   S.running = true; lastTs = Date.now();
-  play('whip'); vibrate(15); wake();
+  play('whip'); sayTurn(p); vibrate(15); wake();
   renderAll(); saveSoon();
 }
 function togglePause(){
@@ -762,10 +818,10 @@ function toggleDone(id){
   if (p.done && S.players.every(q => q.done)) toast(`Everyone is done with round ${S.round}. Hold a circle again to undo.`);
   else if (p.done) toast(`${p.name} is done this round. Hold again to undo.`);
 }
-function nextPlayer(){
-  settle();
+// The player Next would start: the next seat in turn order that is not done this round.
+function pickNext(){
   const cand = S.players.filter(p => !p.done);
-  if (!cand.length) { toast(`Everyone is done. Tap the gear to start round ${S.round + 1}.`); return; }
+  if (!cand.length) return null;
   const ref = activeP() || byId(S.lastId);
   const dir = S.settings.dir === 'ccw' ? -1 : 1;
   const refA = ref ? seatAngle(ref) : 90 - dir * 0.01;
@@ -775,9 +831,21 @@ function nextPlayer(){
     let d = ((seatAngle(p) - refA) * dir) % 360; if (d <= 0) d += 360;
     if (d < bestD) { bestD = d; best = p; }
   }
-  if (!best) best = cand[0];
+  return best || cand[0];
+}
+function nextPlayer(){
+  settle();
+  const best = pickNext();
+  if (!best) { toast(`Everyone is done. Tap the gear to start round ${S.round + 1}.`); return; }
   if (best.id === S.activeId) { toast(`${best.name} is the only player left this round.`); return; }
   startTurn(best.id);
+}
+// Dark icon on light player colours (yellow, white), white icon on the rest.
+function inkFor(hex){
+  const n = parseInt(String(hex).slice(1), 16);
+  if (!Number.isFinite(n)) return '#ffffff';
+  const L = (0.2126 * (n >> 16 & 255) + 0.7152 * (n >> 8 & 255) + 0.0722 * (n & 255)) / 255;
+  return L > 0.62 ? '#1b130c' : '#ffffff';
 }
 function newRound(){
   settle();
@@ -943,7 +1011,7 @@ function bindPress(el, id){
     if (was.moved) {
       const p = byId(id);
       if (p && clearOfBox(p)) { placePlayer(p); toast('Moved next to the box so Pause and Next stay free.'); }
-      save(); return;
+      renderBox(); save(); return;
     }
     if (was.long || cancelled) return;
     tapPlayer(id);
@@ -1000,7 +1068,13 @@ function renderBox(){
     bp.disabled = !a;
     $('#bPauseCap').textContent = resume ? 'Resume' : 'Pause';
     // New round lives only in Settings; the gear pulses when it is time for it.
-    $('#bNext').disabled = !n;
+    const bn = $('#bNext');
+    bn.disabled = !n;
+    // Colour Next after the player whose turn it is; between turns, after the player it will start.
+    const who = a || pickNext();
+    bn.classList.toggle('player-color', !!who);
+    if (who) { bn.style.setProperty('--nc', who.color); bn.style.setProperty('--nink', inkFor(who.color)); }
+    bn.setAttribute('aria-label', who ? (a ? `Next player (${a.name}'s turn now)` : `Next player: start ${who.name}`) : 'Next player');
   }
   $('#bSettings').classList.toggle('attention', !S.setup && allDone);
   $('#bxPlate').textContent = plate;
@@ -1142,8 +1216,26 @@ function syncSettings(){
   $('#silentHint').textContent = canSession
     ? 'With silent play on, the timer can pause music playing in another app.'
     : 'On iPhone, sounds are muted while the silent switch is on.';
-  ['sWhip', 'sWarn', 'sCount', 'sUp', 'facing', 'wake'].forEach(k => { $('#' + k).checked = !!s[k]; });
+  ['sWhip', 'sWarn', 'sCount', 'sUp', 'sSay', 'facing', 'wake'].forEach(k => { $('#' + k).checked = !!s[k]; });
+  $('#sayRow').hidden = $('#voiceRow').hidden = !TTS;
+  fillVoices();
   renderChips();
+}
+function fillVoices(){
+  const sel = $('#voiceSel'), hint = $('#voiceHint');
+  if (!TTS) { hint.textContent = 'This browser cannot speak names.'; return; }
+  const list = voices.filter(v => isZh(v) || /^en/i.test(v.lang || ''))
+    .sort((a, b) => (isZh(b) - isZh(a)) || a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name));
+  sel.textContent = '';
+  const auto = document.createElement('option');
+  auto.value = ''; auto.textContent = 'Chinese (automatic)';
+  sel.appendChild(auto);
+  list.forEach(v => { const o = document.createElement('option'); o.value = v.voiceURI; o.textContent = `${v.name} (${v.lang})`; sel.appendChild(o); });
+  sel.value = list.some(v => v.voiceURI === S.settings.voiceURI) ? S.settings.voiceURI : '';
+  const v = pickVoice();
+  hint.textContent = !voices.length ? 'Voices are still loading. Open Settings again in a moment.'
+    : !voices.some(isZh) ? 'This device has no Chinese voice, so the default voice is used.'
+    : `Names are read by ${v ? v.name : 'a Chinese voice'}, in English.`;
 }
 function renderStats(){
   const tb = $('#statsBody'); tb.textContent = '';
@@ -1214,7 +1306,9 @@ $('#sOn').addEventListener('change', e => { S.settings.sound = e.target.checked;
 $('#sSilent').addEventListener('change', e => { S.settings.sSilent = e.target.checked; applyAudioSession(); save(); });
 $('#vol').addEventListener('input', e => { S.settings.volume = e.target.value / 100; setVolume(); saveSoon(); });
 $('#vol').addEventListener('change', () => { unlock(); play('tick', 6, true); });
-['sWhip', 'sWarn', 'sCount', 'sUp'].forEach(k => $('#' + k).addEventListener('change', e => { S.settings[k] = e.target.checked; save(); }));
+['sWhip', 'sWarn', 'sCount', 'sUp', 'sSay'].forEach(k => $('#' + k).addEventListener('change', e => { S.settings[k] = e.target.checked; save(); }));
+const samplePlayer = () => activeP() || pickNext() || S.players[0] || { name: 'Alex' };
+$('#voiceSel').addEventListener('change', e => { S.settings.voiceURI = e.target.value; save(); fillVoices(); unlock(); sayTurn(samplePlayer(), true); });
 $('#facing').addEventListener('change', e => { S.settings.facing = e.target.checked; layoutPlayers(); save(); });
 $('#wake').addEventListener('change', e => { S.settings.wake = e.target.checked; if (e.target.checked) { if (S.running) wake(); } else unwake(); save(); });
 document.querySelectorAll('.test').forEach(b => {
@@ -1223,6 +1317,7 @@ document.querySelectorAll('.test').forEach(b => {
     unlock();
     const k = b.dataset.test;
     if (k === 'warn') { play('warn60', null, true); setTimeout(() => play('warn30', null, true), 1500); }
+    else if (k === 'say') sayTurn(samplePlayer(), true);
     else if (k === 'count') { [5, 4, 3, 2, 1].forEach((n, i) => setTimeout(() => play('tick', n, true), i * 1000)); setTimeout(() => play('up', null, true), 5000); }
     else play(k, null, true);
   });
