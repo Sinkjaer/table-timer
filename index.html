@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Table Timer">
 <meta name="theme-color" content="#120e0b">
-<meta name="tt-build" content="89e24011f651">
+<meta name="tt-build" content="b003a8b699dd">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@700&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
 <style>
 /* Layout: a top-down view of a felt game table in a lamplit room. Player tokens sit on the rim;
-   a walnut box in the middle is the control hub. One committed dark look, by choice. */
+   two large square buttons (Pause, Next) sit on the felt; settings hide behind a gear in the corner.
+   One committed dark look, by choice. */
 :root{
   color-scheme: dark;
   --room:#120e0b; --room-2:#2c2119;
@@ -64,45 +65,31 @@ dialog{touch-action:manipulation;overscroll-behavior:contain}
 #felt::after{content:"";position:absolute;inset:0;background:radial-gradient(50% 45% at 50% 45%,rgba(255,236,190,.09),transparent 70%);pointer-events:none}
 
 /* ---------- the wooden box ---------- */
-#box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:240px;border-radius:14px;padding:12px;overflow:hidden;
-  background:linear-gradient(160deg,var(--walnut) 0%,var(--walnut-2) 100%);
-  box-shadow:0 5px 0 var(--walnut-edge),0 24px 38px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,220,170,.22),inset 0 -2px 0 rgba(0,0,0,.4)}
-#box::before{content:"";position:absolute;inset:6px;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5),0 0 0 1px rgba(255,220,170,.09);pointer-events:none}
-.corner{position:absolute;width:18px;height:18px;z-index:1;pointer-events:none;
-  background:linear-gradient(180deg,var(--brass-hi),var(--brass-lo)) 0 0/100% 4px no-repeat,linear-gradient(90deg,var(--brass-hi),var(--brass-lo)) 0 0/4px 100% no-repeat;
-  filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
-.corner.tl{left:3px;top:3px}.corner.tr{right:3px;top:3px;transform:scaleX(-1)}
-.corner.bl{left:3px;bottom:3px;transform:scaleY(-1)}.corner.br{right:3px;bottom:3px;transform:scale(-1,-1)}
-.box-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:9px}
-.plate{font:700 13px/1 var(--f-display);letter-spacing:.1em;color:var(--brass-ink);padding:5px 14px 4px;border-radius:4px;
-  background:linear-gradient(180deg,var(--brass-hi),var(--brass) 55%,var(--brass-lo));
-  box-shadow:0 1px 0 rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.5);text-shadow:0 1px 0 rgba(255,240,200,.55)}
-.card{width:100%;background:var(--paper);color:var(--ink);border-radius:6px;padding:8px 10px 9px;text-align:center;
-  box-shadow:0 1px 2px rgba(0,0,0,.45),inset 0 0 0 1px rgba(80,50,20,.18)}
-.status{margin:0;font:700 17px/1.2 var(--f-body);text-wrap:balance;overflow-wrap:anywhere}
-.sub{margin:4px 0 0;font:500 12.5px/1.35 var(--f-body);color:var(--ink-2);text-wrap:balance}
-.ctrls{display:flex;justify-content:center;align-items:flex-end;gap:18px}
-.ctrl{display:flex;flex-direction:column;align-items:center;gap:6px;font:600 11px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:#e9d3a3;white-space:nowrap}
-#stage.narrow .ctrls{gap:12px}
-#stage.narrow .tok.mid{width:56px;height:56px}
-#stage.narrow .tok.big{width:92px;height:92px}
-#stage.narrow .tok.big svg{width:46px;height:46px}
-.box-top{display:grid;grid-template-columns:36px minmax(0,1fr) 36px;align-items:center;gap:4px;width:100%}
-.box-top .plate{grid-column:2;justify-self:center;white-space:nowrap}
-#stage.narrow .box-top{grid-template-columns:minmax(0,1fr) 36px}
-#stage.narrow .box-top .plate{grid-column:1}
-.gear{grid-column:3;width:36px;height:36px;padding:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;
-  border:1px solid rgba(255,220,170,.3);background:rgba(0,0,0,.24);color:#f1e2c4}
-.gear:hover{background:rgba(255,220,170,.12)}
+/* ---------- controls straight on the felt (no box) ---------- */
+#box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;max-width:var(--hubw,240px);text-align:center}
+.box-inner{display:flex;flex-direction:column;align-items:center;gap:10px}
+.plate{font:700 13px/1 var(--f-display);letter-spacing:.12em;color:var(--brass-hi);text-shadow:0 1px 2px rgba(0,0,0,.65)}
+.card{max-width:var(--hubw,240px)}
+.status{margin:0;font:700 19px/1.2 var(--f-body);color:var(--text);text-shadow:0 1px 3px rgba(0,0,0,.75);text-wrap:balance;overflow-wrap:anywhere}
+.sub{margin:4px 0 0;font:500 13px/1.35 var(--f-body);color:#d3e2d9;text-shadow:0 1px 2px rgba(0,0,0,.65);text-wrap:balance}
+.ctrls{display:flex;justify-content:center;align-items:flex-end;gap:var(--cgap,16px)}
+.ctrl{display:flex;flex-direction:column;align-items:center;gap:7px;font:600 11px/1 var(--f-body);letter-spacing:.07em;text-transform:uppercase;color:rgba(246,240,231,.82);text-shadow:0 1px 2px rgba(0,0,0,.6);white-space:nowrap}
+/* Settings live behind a gear in the corner, away from the play buttons. */
+.gear{position:absolute;top:0;right:0;z-index:20;width:44px;height:44px;padding:0;border-radius:12px;display:grid;place-items:center;cursor:pointer;
+  border:1px solid rgba(255,220,170,.3);background:rgba(20,15,11,.72);color:#f1e2c4;box-shadow:0 4px 10px rgba(0,0,0,.45)}
+.gear:hover{background:rgba(60,45,32,.85)}
 .gear.attention{animation:nudge 1.6s ease-in-out infinite;border-color:var(--brass-hi);color:var(--brass-hi)}
-.gear svg{width:20px;height:20px}
-.tok{width:46px;height:46px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;color:var(--brass-ink);
-  background:radial-gradient(circle at 35% 30%,var(--brass-hi),var(--brass) 55%,var(--brass-lo) 100%);
+.gear svg{width:24px;height:24px}
+/* Square buttons with rounded corners; Pause and Next are sized from the felt in measure(). */
+.tok{width:56px;height:56px;border-radius:16px;border:0;display:grid;place-items:center;cursor:pointer;color:var(--brass-ink);
+  background:radial-gradient(circle at 35% 25%,var(--brass-hi),var(--brass) 58%,var(--brass-lo) 100%);
   box-shadow:0 3px 0 #5a3c12,0 6px 10px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .08s,box-shadow .08s,filter .2s}
 .tok:active{transform:translateY(2px);box-shadow:0 1px 0 #5a3c12,0 3px 6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.55)}
-.tok.mid{width:64px;height:64px}
-.tok.big{width:104px;height:104px}
-.tok svg{width:22px;height:22px}.tok.mid svg{width:30px;height:30px}.tok.big svg{width:52px;height:52px}
+.tok.mid{width:var(--pb,72px);height:var(--pb,72px);border-radius:22%}
+.tok.big{width:var(--nb,100px);height:var(--nb,100px);border-radius:22%}
+.tok svg{width:24px;height:24px}
+.tok.mid svg{width:calc(var(--pb,72px)*.44);height:calc(var(--pb,72px)*.44)}
+.tok.big svg{width:calc(var(--nb,100px)*.48);height:calc(var(--nb,100px)*.48)}
 /* Next wears the colour of the player whose turn it is (or who it will start). */
 #bNext.player-color{color:var(--nink);
   background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--nc) 50%,#fff) 0%,var(--nc) 52%,color-mix(in srgb,var(--nc) 62%,#000) 100%);
@@ -121,13 +108,6 @@ dialog{touch-action:manipulation;overscroll-behavior:contain}
 #stage.compact .sub{display:none}
 #stage.tiny .plate,#stage.tiny .ctrl span{display:none}
 #stage.tiny .box-inner{gap:7px}
-#stage.tiny .tok.mid{width:52px;height:52px}
-#stage.tiny .tok.big{width:76px;height:76px}
-#stage.tiny .tok.big svg{width:38px;height:38px}
-#stage.xnarrow .ctrls{gap:8px}
-#stage.xnarrow .tok.mid{width:46px;height:46px}
-#stage.xnarrow .tok.big{width:72px;height:72px}
-#stage.xnarrow .tok.big svg{width:36px;height:36px}
 
 /* ---------- players ---------- */
 #players{position:absolute;inset:0;z-index:5;pointer-events:none}
@@ -291,13 +271,8 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
     </div>
 
     <section id="box" aria-label="Game controls">
-      <svg class="grain" aria-hidden="true"><filter id="fWalnut" x="0" y="0" width="100%" height="100%"><feTurbulence id="walnutNoise" type="fractalNoise" baseFrequency="0.012 0.17" numOctaves="3" seed="11"/><feColorMatrix type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.045  0 0 0 0 0.02  0 0 1.7 0 -0.6"/></filter><rect width="100%" height="100%" filter="url(#fWalnut)"/></svg>
-      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
       <div class="box-inner">
-        <div class="box-top">
-          <div class="plate" id="bxPlate">Round 1</div>
-          <button class="gear" id="bSettings" type="button" aria-label="Settings, players and new round"></button>
-        </div>
+        <div class="plate" id="bxPlate">Round 1</div>
         <div class="card" role="status" aria-live="polite">
           <p class="status" id="bxStatus">Tap a player to start</p>
           <p class="sub" id="bxSub"></p>
@@ -317,6 +292,7 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
     </section>
 
     <div id="players"></div>
+    <button class="gear" id="bSettings" type="button" aria-label="Settings, players and new round"></button>
     <div id="toast" role="status" aria-live="polite"></div>
   </div>
 </div>
@@ -550,10 +526,15 @@ function measure(){
   stage.style.setProperty('--tin', tin.toFixed(1) + 'px');
   stage.style.setProperty('--trad', trad.toFixed(1) + 'px');
   stage.style.setProperty('--rim', G.rim + 'px');
-  const bw = Math.round(clamp(G.tw * 0.84, 150, 300));
-  box.style.width = bw + 'px';
-  stage.classList.toggle('narrow', bw < 214);
-  stage.classList.toggle('xnarrow', bw < 184);
+  // Pause and Next sit straight on the felt: size them from the felt's width and height.
+  const feltW = G.tw - 2 * G.rim, feltH = G.th - 2 * G.rim;
+  const hubw = Math.round(clamp(feltW - 4, 150, 360));
+  const nb = Math.round(clamp(Math.min(hubw * 0.52, feltH * 0.5), 72, 150));
+  const pb = Math.round(nb * 0.74);
+  stage.style.setProperty('--hubw', hubw + 'px');
+  stage.style.setProperty('--nb', nb + 'px');
+  stage.style.setProperty('--pb', pb + 'px');
+  stage.style.setProperty('--cgap', Math.round(clamp(hubw - nb - pb - 4, 8, 22)) + 'px');
   fitBox();
   const portrait = G.H > G.W;
   $('#oakNoise').setAttribute('baseFrequency', portrait ? '0.11 0.005' : '0.005 0.11');
