@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Table Timer">
 <meta name="theme-color" content="#120e0b">
+<meta name="tt-build" content="e14f852d2d93">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -226,6 +227,11 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
 .link{background:none;border:0;color:var(--brass-hi);font:600 13px/1 var(--f-body);padding:6px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .link:disabled{opacity:.35;cursor:default;text-decoration:none}
 .hint{margin:0;font:400 13px/1.45 var(--f-body);color:var(--muted)}
+.clip{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.btn.rec{display:inline-flex;align-items:center;gap:7px}
+.rec-dot{width:10px;height:10px;border-radius:50%;background:var(--bad)}
+.btn.rec.on{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.rec.on .rec-dot{background:#fff;animation:blink 1s steps(2,jump-none) infinite}
 .sheet-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .btn{border-radius:10px;padding:11px 16px;font:600 15px/1 var(--f-body);border:1px solid var(--line);background:var(--panel-2);color:var(--text);cursor:pointer}
 .btn.primary{background:var(--brass);color:var(--brass-ink);border-color:var(--brass)}
@@ -341,6 +347,17 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
       </div>
     </div>
     <p class="hint">The second photo replaces the first after a long press, when this player is done for the round. You can also drop an image file straight onto a circle.</p>
+    <div class="field">
+      <span class="flabel">Turn sound</span>
+      <div class="clip">
+        <button type="button" class="btn sm rec" id="pRec"><span class="rec-dot" aria-hidden="true"></span><span id="pRecLabel">Record</span></button>
+        <button type="button" class="btn sm" id="pClipUp">Upload</button>
+        <button type="button" class="btn sm" id="pClipPlay">Play</button>
+        <button type="button" class="link" id="pClipDel">Remove</button>
+      </div>
+      <input type="file" id="pClip" accept="audio/*" hidden>
+      <p class="hint" id="pClipHint"></p>
+    </div>
     <footer class="sheet-foot"><button type="button" class="btn danger" id="pRemove">Remove player</button><button class="btn primary" value="ok">Done</button></footer>
   </form>
 </dialog>
@@ -396,10 +413,10 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
       <label class="row first"><span>Sound</span><input type="checkbox" class="switch" id="sOn"></label>
       <label class="row" id="silentRow"><span>Play sounds when iPhone is on silent</span><input type="checkbox" class="switch" id="sSilent"></label>
       <label class="row"><span>Volume</span><input type="range" id="vol" min="0" max="100" step="5"></label>
-      <div class="row"><label for="sWhip">Whip crack on a new player</label><span class="row-r"><button type="button" class="test" data-test="whip" aria-label="Play the whip sound"></button><input type="checkbox" class="switch" id="sWhip"></span></div>
-      <div class="row" id="sayRow"><label for="sSay">Say the player's name on their turn</label><span class="row-r"><button type="button" class="test" data-test="say" aria-label="Hear the name announcement"></button><input type="checkbox" class="switch" id="sSay"></span></div>
-      <label class="row" id="voiceRow"><span>Voice</span><select id="voiceSel"></select></label>
+      <div class="row" id="sayRow"><label for="sSay">Announce each player when their turn starts</label><span class="row-r"><button type="button" class="test" data-test="say" aria-label="Hear an announcement"></button><input type="checkbox" class="switch" id="sSay"></span></div>
+      <label class="row" id="voiceRow"><span>Accent</span><select id="voiceSel"></select></label>
       <p class="hint" id="voiceHint"></p>
+      <div class="row"><label for="sWhip">Whip crack when announcing is off</label><span class="row-r"><button type="button" class="test" data-test="whip" aria-label="Play the whip sound"></button><input type="checkbox" class="switch" id="sWhip"></span></div>
       <div class="row"><label for="sWarn">Chime at 60 and 30 seconds left</label><span class="row-r"><button type="button" class="test" data-test="warn" aria-label="Play the warning chimes"></button><input type="checkbox" class="switch" id="sWarn"></span></div>
       <div class="row"><label for="sCount">Tick every second from 10</label><span class="row-r"><button type="button" class="test" data-test="count" aria-label="Play the countdown"></button><input type="checkbox" class="switch" id="sCount"></span></div>
       <div class="row"><label for="sUp">Wrong-answer buzzer at zero</label><span class="row-r"><button type="button" class="test" data-test="up" aria-label="Play the buzzer"></button><input type="checkbox" class="switch" id="sUp"></span></div>
@@ -426,7 +443,7 @@ const COLORS = ['#e0533d','#f0b429','#3fae6a','#3d8bd9','#9a6ad6','#e2639b','#2b
 const COLOR_NAMES = ['Red','Yellow','Green','Blue','Purple','Pink','Teal','White'];
 const START_NAMES = ['Alex','Sam','Robin','Kim'];
 const TURN_PRESETS = [15,30,45,60,90,120,180,300];
-const BANK_PRESETS = [300,600,900,1200,1800,2700,3600];
+const BANK_PRESETS = [60,120,180,300,600,900,1200,1800,3600];
 const ICON = {
   play:'<svg viewBox="0 0 24 24"><path d="M8 5.2v13.6L19 12z" fill="currentColor"/></svg>',
   pause:'<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4.2" height="14" rx="1.2" fill="currentColor"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2" fill="currentColor"/></svg>',
@@ -472,7 +489,7 @@ let lastTs = Date.now(), lastSaved = 0;
 /* ---------- state ---------- */
 function defaults(){
   return {
-    settings: { mode: 'turn', turnSec: 60, bankSec: 900, incSec: 0, dir: 'cw', sound: true, volume: 0.8, sSilent: true, sSay: true, voiceURI: '',
+    settings: { mode: 'bank', turnSec: 60, bankSec: 180, incSec: 0, clockV2: true, dir: 'cw', sound: true, volume: 0.8, sSilent: true, sSay: true, voiceURI: 'auto:zh-CN',
                 sWhip: true, sWarn: true, sCount: true, sUp: true, facing: true, wake: true },
     players: [], activeId: null, lastId: null, running: false, round: 1, setup: false
   };
@@ -489,8 +506,18 @@ function load(data){
   const base = defaults();
   if (d && Array.isArray(d.players)) {
     Object.assign(base.settings, d.settings || {});
+    if (!base.settings.voiceURI) base.settings.voiceURI = 'auto:zh-CN';
     base.players = d.players.slice(0, MAX_PLAYERS).map(p => Object.assign(
-      { id: uid(), name: 'Player', color: COLORS[0], x: null, y: null, img: null, doneImg: null, remaining: NaN, total: 0, turns: 0, done: false }, p));
+      { id: uid(), name: 'Player', color: COLORS[0], x: null, y: null, img: null, doneImg: null, sound: null, soundDur: 0, remaining: NaN, total: 0, turns: 0, done: false }, p));
+    // One-time move to the new default clock (chess clock, 3 min) for a phone still on the old
+    // untouched default (1-minute turn timer) with no turns played yet.
+    const old = d.settings || {};
+    if (!old.clockV2 && (old.mode || 'turn') === 'turn' && (old.turnSec || 60) === 60 &&
+        (old.bankSec || 900) === 900 && base.players.every(p => !p.turns)) {
+      base.settings.mode = 'bank'; base.settings.bankSec = 180;
+      base.players.forEach(p => { p.remaining = 180; });
+    }
+    base.settings.clockV2 = true;
     base.activeId = base.players.some(p => p.id === d.activeId) ? d.activeId : null;
     base.lastId = base.players.some(p => p.id === d.lastId) ? d.lastId : null;
     base.round = d.round || 1;
@@ -501,6 +528,7 @@ function serial(){
   return {
     v: 1, settings: S.settings,
     players: S.players.map(p => ({ id: p.id, name: p.name, color: p.color, x: p.x, y: p.y, img: p.img, doneImg: p.doneImg,
+                                   sound: p.sound || null, soundDur: p.soundDur || 0,
                                    remaining: p.remaining, total: p.total, turns: p.turns, done: p.done })),
     activeId: S.activeId, lastId: S.lastId, round: S.round
   };
@@ -511,8 +539,8 @@ function save(){
   try { localStorage.setItem(KEY, JSON.stringify(serial())); }
   catch (e) {
     if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
-      if (!warnedQuota) { warnedQuota = true; toast('The photos are too large to keep on this device. They stay until you close the page.'); }
-      try { const lite = serial(); lite.players.forEach(p => { p.img = null; p.doneImg = null; }); localStorage.setItem(KEY, JSON.stringify(lite)); } catch (_) {}
+      if (!warnedQuota) { warnedQuota = true; toast('The photos and sounds are too large to keep on this device. They stay until you close the page.'); }
+      try { const lite = serial(); lite.players.forEach(p => { p.img = null; p.doneImg = null; p.sound = null; p.soundDur = 0; }); localStorage.setItem(KEY, JSON.stringify(lite)); } catch (_) {}
     }
   }
 }
@@ -663,6 +691,7 @@ function unlock(){
   try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
   // iPhone only lets a page speak after it has spoken once inside a tap; say nothing, silently.
   try { if (TTS) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; TTS.speak(u); } } catch (e) {}
+  S.players.forEach(p => { if (p.sound) clipBuffer(p).catch(() => {}); });
 }
 
 /* ---------- spoken turn announcements ---------- */
@@ -676,27 +705,114 @@ if (TTS) {
   loadVoices();
   try { TTS.addEventListener('voiceschanged', loadVoices); } catch (e) { TTS.onvoiceschanged = loadVoices; }
 }
-const isZh = v => /^zh/i.test(v.lang || '');
-// The chosen voice, or by default a Mandarin Chinese voice reading the English words.
-function pickVoice(){
-  const want = S.settings.voiceURI;
-  if (want) { const v = voices.find(x => x.voiceURI === want); if (v) return v; }
-  const zh = voices.filter(isZh), cn = zh.filter(v => /zh[-_]CN/i.test(v.lang));
-  // Prefer the standard Mandarin voices (Apple Tingting / Li-Mu / Yu-shu, Google, Microsoft) over novelty ones.
-  const std = /ting|li-?mu|yu-?shu|google|xiaoxiao|huihui|yaoyao|kangkang|yunxi/i;
-  return cn.find(v => std.test(v.name)) || cn.find(v => v.localService) || cn[0] || zh[0] || null;
+// Asian accents: a voice for that language reads the (usually English) name.
+const ACCENTS = [['zh-CN', 'Chinese (Mandarin)'], ['zh-HK', 'Cantonese'], ['zh-TW', 'Taiwanese'], ['ja-JP', 'Japanese'], ['ko-KR', 'Korean'], ['th-TH', 'Thai'], ['vi-VN', 'Vietnamese']];
+const normLang = l => String(l || '').replace('_', '-').toLowerCase();
+const isAsian = v => /^(zh|ja|ko|th|vi)/.test(normLang(v.lang));
+// Standard system voices (Apple, Google, Microsoft) before novelty ones like "Eddy" or "Grandma".
+const STD_VOICE = /ting|li-?mu|yu-?shu|sin-?ji|mei-?jia|kyoko|otoya|o-?ren|hattori|yuna|kanya|narisa|linh|google|microsoft|xiaoxiao|huihui|yaoyao|kangkang|yunxi|haruka|ayumi|ichiro|heami/i;
+function accentLang(){
+  const w = S.settings.voiceURI || 'auto:zh-CN';
+  return w.startsWith('auto:') ? w.slice(5) : null;
 }
-function sayTurn(p, force){
-  const s = S.settings;
-  if (!TTS || !p || (!force && (!s.sound || !s.sSay))) return;
-  clearTimeout(sayTimer);
-  try { TTS.cancel(); } catch (e) {}
-  const u = new SpeechSynthesisUtterance(`${p.name}, your turn`);
+function pickVoice(){
+  const want = S.settings.voiceURI || 'auto:zh-CN';
+  if (!want.startsWith('auto:')) { const v = voices.find(x => x.voiceURI === want); if (v) return v; }
+  const lang = normLang(want.startsWith('auto:') ? want.slice(5) : 'zh-CN');
+  const exact = voices.filter(v => normLang(v.lang) === lang);
+  const pool = exact.length ? exact : voices.filter(v => normLang(v.lang).slice(0, 2) === lang.slice(0, 2));
+  return pool.find(v => STD_VOICE.test(v.name)) || pool.find(v => v.localService) || pool[0] || null;
+}
+// Read just the name, in the chosen accent.
+function speakName(p){
+  if (!TTS || !p) return false;
+  const u = new SpeechSynthesisUtterance(p.name);
   const v = pickVoice();
-  if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'zh-CN';
-  u.volume = Math.min(1, s.volume + 0.15); u.rate = 0.95;
-  // Let the whip crack finish first.
-  sayTimer = setTimeout(() => { try { TTS.speak(u); } catch (e) {} }, force ? 0 : 300);
+  if (v) { u.voice = v; u.lang = v.lang; } else u.lang = accentLang() || 'zh-CN';
+  u.volume = Math.min(1, S.settings.volume + 0.15); u.rate = 0.9;
+  try { TTS.speak(u); return true; } catch (e) { return false; }
+}
+// What plays when a turn starts: the player's own sound, else their name read aloud, else the whip.
+let annTok = 0;
+function announce(p, force){
+  const s = S.settings;
+  if (!p || (!force && !s.sound)) return;
+  const tok = ++annTok;
+  try { if (TTS) TTS.cancel(); } catch (e) {}
+  stopClip();
+  if (force || s.sSay) {
+    if (p.sound) { playClip(p, tok); return; }
+    if (speakName(p)) return;
+  }
+  play('whip', null, force);
+}
+
+/* ---------- each player's own name sound (recorded or uploaded) ---------- */
+const CLIP_RATE = 16000, CLIP_MAX = 4;
+const clipCache = new Map();
+let clipSrc = null;
+function dataUrlBytes(url){
+  const b = atob(url.slice(url.indexOf(',') + 1)), a = new Uint8Array(b.length);
+  for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i);
+  return a;
+}
+function decodeAudio(c, ab){
+  return new Promise((res, rej) => { const r = c.decodeAudioData(ab, res, rej); if (r && r.then) r.then(res, rej); });
+}
+async function clipBuffer(p){
+  const c = audio(); if (!c || !p.sound) return null;
+  const hit = clipCache.get(p.id);
+  if (hit && hit.src === p.sound) return hit.buf;
+  const buf = await decodeAudio(c, dataUrlBytes(p.sound).buffer);
+  clipCache.set(p.id, { src: p.sound, buf });
+  return buf;
+}
+async function playClip(p, tok){
+  try {
+    const buf = await clipBuffer(p);
+    if (!buf || tok !== annTok) return;
+    const src = A.ctx.createBufferSource(), g = A.ctx.createGain();
+    src.buffer = buf; g.gain.value = 1.2; src.connect(g); g.connect(A.out); src.start();
+    clipSrc = src;
+  } catch (e) { if (tok === annTok && !speakName(p)) play('whip'); }
+}
+function stopClip(){ try { if (clipSrc) clipSrc.stop(); } catch (e) {} clipSrc = null; }
+// Turn any recording or sound file into a short, trimmed, level mono WAV that every browser can play.
+async function processClip(blob){
+  const c = audio(); if (!c) throw new Error('noaudio');
+  const buf = await decodeAudio(c, await blob.arrayBuffer());
+  const sr = buf.sampleRate, len = buf.length, chs = buf.numberOfChannels;
+  const mono = new Float32Array(len);
+  for (let k = 0; k < chs; k++) { const d = buf.getChannelData(k); for (let i = 0; i < len; i++) mono[i] += d[i] / chs; }
+  let peak = 0; for (let i = 0; i < len; i++) { const v = Math.abs(mono[i]); if (v > peak) peak = v; }
+  if (peak < 0.004) throw new Error('silent');
+  const thr = Math.max(0.01, peak * 0.06);
+  let a = 0, b = len - 1;
+  while (a < len && Math.abs(mono[a]) < thr) a++;
+  while (b > a && Math.abs(mono[b]) < thr) b--;
+  a = Math.max(0, a - Math.round(0.04 * sr));
+  b = Math.min(len - 1, b + Math.round(0.15 * sr));
+  const cut = mono.subarray(a, Math.min(b + 1, a + Math.round(CLIP_MAX * sr)));
+  const n = Math.max(1, Math.round(cut.length * CLIP_RATE / sr)), out = new Float32Array(n), gain = 0.9 / peak;
+  for (let i = 0; i < n; i++) {
+    const x = i * sr / CLIP_RATE, i0 = Math.floor(x), f = x - i0, s0 = cut[i0] || 0, s1 = i0 + 1 < cut.length ? cut[i0 + 1] : s0;
+    out[i] = (s0 + (s1 - s0) * f) * gain;
+  }
+  const fade = Math.min(n >> 1, Math.round(0.01 * CLIP_RATE));
+  for (let i = 0; i < fade; i++) { out[i] *= i / fade; out[n - 1 - i] *= i / fade; }
+  return { url: wavDataUrl(out, CLIP_RATE), dur: n / CLIP_RATE };
+}
+function wavDataUrl(s, rate){
+  const n = s.length, ab = new ArrayBuffer(44 + n * 2), v = new DataView(ab);
+  const w = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.round(Math.max(-1, Math.min(1, s[i])) * 0x7fff), true);
+  const bytes = new Uint8Array(ab); let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return 'data:audio/wav;base64,' + btoa(bin);
 }
 function env(t, peak, attack, decay){
   const n = A.ctx.createGain();
@@ -798,7 +914,7 @@ function startTurn(id){
   if (S.settings.mode === 'turn') p.remaining = S.settings.turnSec;
   p.turns++;
   S.running = true; lastTs = Date.now();
-  play('whip'); sayTurn(p); vibrate(15); wake();
+  announce(p); vibrate(15); wake();
   renderAll(); saveSoon();
 }
 function togglePause(){
@@ -1142,7 +1258,7 @@ function openEditor(id, fresh){
   const p = byId(id); if (!p) return;
   editId = id;
   $('#pName').value = p.name;
-  renderSwatches(p); renderSlots(p); disarmRemove();
+  renderSwatches(p); renderSlots(p); renderClipUI(); disarmRemove();
   if (!dlgP.open) dlgP.showModal();
   if (fresh) { const n = $('#pName'); n.focus(); n.select(); }
 }
@@ -1165,11 +1281,82 @@ $('#pRemove').addEventListener('click', () => {
   clearTimeout(removeArmed); disarmRemove();
   removePlayer(p.id); dlgP.close();
 });
-dlgP.addEventListener('close', () => { editId = null; clearTimeout(removeArmed); disarmRemove(); save(); });
+dlgP.addEventListener('close', () => { stopRecording(true); editId = null; clearTimeout(removeArmed); disarmRemove(); save(); });
+
+/* ---------- turn sound: record or upload ---------- */
+// Recording needs the microphone, which a page shown inside Claude is not given; the home-screen app has it.
+const canRecord = () => !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder) && window.top === window.self;
+let rec = null;
+function renderClipUI(){
+  const p = byId(editId); if (!p) return;
+  const recOK = canRecord();
+  $('#pRec').hidden = !recOK;
+  $('#pRec').classList.toggle('on', !!rec);
+  $('#pRecLabel').textContent = rec ? `Stop (${((Date.now() - rec.startedAt) / 1000).toFixed(1)} s)` : 'Record';
+  $('#pClipDel').disabled = !p.sound;
+  const what = rec ? `Recording. Say the name; it stops by itself after ${CLIP_MAX} seconds.`
+    : p.sound ? `${p.name}'s own sound (${p.soundDur.toFixed(1)} s) plays when their turn starts.`
+    : `No sound yet, so the name is read aloud. ${recOK ? 'Record' : 'Upload'} up to ${CLIP_MAX} seconds to use instead.`;
+  $('#pClipHint').textContent = recOK ? what : what + ' Recording works in the home-screen app; here you can upload a sound file.';
+}
+async function setClip(id, blob){
+  try {
+    const { url, dur } = await processClip(blob);
+    const p = byId(id); if (!p) return;
+    p.sound = url; p.soundDur = dur; clipCache.delete(id);
+    save(); renderClipUI();
+    announce(p, true);
+  } catch (e) {
+    toast(e && e.message === 'silent' ? 'That sound was silent. Try again closer to the phone.' : "That sound couldn't be used. Try an M4A, MP3 or WAV file.");
+  }
+}
+async function startRecording(){
+  if (rec) { stopRecording(); return; }
+  const id = editId; if (!id) return;
+  unlock();
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+  catch (e) {
+    toast(e && e.name === 'NotAllowedError'
+      ? 'Microphone access was refused. Allow it for this site in Settings, or upload a sound instead.'
+      : 'The microphone could not start. Upload a sound instead.');
+    return;
+  }
+  const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+  let mr;
+  try { mr = new MediaRecorder(stream, type ? { mimeType: type } : undefined); }
+  catch (e) { stream.getTracks().forEach(t => t.stop()); toast('Recording is not supported here. Upload a sound instead.'); return; }
+  const chunks = [];
+  mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  mr.onstop = () => {
+    stream.getTracks().forEach(t => t.stop());
+    applyAudioSession();
+    const r = rec; rec = null; renderClipUI();
+    if (!r || r.cancelled || !chunks.length) return;
+    setClip(r.id, new Blob(chunks, { type: mr.mimeType || type || 'audio/mp4' }));
+  };
+  rec = { mr, id, startedAt: Date.now(), cancelled: false,
+          timer: setTimeout(() => stopRecording(), CLIP_MAX * 1000 + 300), tick: setInterval(renderClipUI, 200) };
+  try { mr.start(); } catch (e) { stopRecording(true); toast('Recording could not start. Upload a sound instead.'); return; }
+  renderClipUI();
+}
+function stopRecording(cancel){
+  if (!rec) return;
+  clearTimeout(rec.timer); clearInterval(rec.tick);
+  if (cancel) rec.cancelled = true;
+  try { if (rec.mr.state !== 'inactive') rec.mr.stop(); else { rec = null; } } catch (e) { rec = null; }
+  renderClipUI();
+}
+$('#pRec').addEventListener('click', startRecording);
+$('#pClipUp').addEventListener('click', () => $('#pClip').click());
+$('#pClip').addEventListener('change', e => { const f = e.target.files[0]; if (f && editId) setClip(editId, f); e.target.value = ''; });
+$('#pClipPlay').addEventListener('click', () => { unlock(); const p = byId(editId); if (p) announce(p, true); });
+$('#pClipDel').addEventListener('click', () => { const p = byId(editId); if (!p) return; p.sound = null; p.soundDur = 0; clipCache.delete(p.id); save(); renderClipUI(); });
 function removePlayer(id){
   const i = S.players.findIndex(p => p.id === id); if (i < 0) return;
   const [p] = S.players.splice(i, 1);
   if (p._el) p._el.remove();
+  clipCache.delete(id);
   if (S.activeId === id) { S.activeId = null; S.running = false; }
   if (S.lastId === id) S.lastId = null;
   renderAll(); save();
@@ -1223,19 +1410,26 @@ function syncSettings(){
 }
 function fillVoices(){
   const sel = $('#voiceSel'), hint = $('#voiceHint');
-  if (!TTS) { hint.textContent = 'This browser cannot speak names.'; return; }
-  const list = voices.filter(v => isZh(v) || /^en/i.test(v.lang || ''))
-    .sort((a, b) => (isZh(b) - isZh(a)) || a.lang.localeCompare(b.lang) || a.name.localeCompare(b.name));
+  if (!TTS) { hint.textContent = 'This browser cannot read names aloud. Players with their own sound still play it.'; return; }
+  const have = l => voices.some(v => normLang(v.lang) === normLang(l));
   sel.textContent = '';
-  const auto = document.createElement('option');
-  auto.value = ''; auto.textContent = 'Chinese (automatic)';
-  sel.appendChild(auto);
-  list.forEach(v => { const o = document.createElement('option'); o.value = v.voiceURI; o.textContent = `${v.name} (${v.lang})`; sel.appendChild(o); });
-  sel.value = list.some(v => v.voiceURI === S.settings.voiceURI) ? S.settings.voiceURI : '';
+  const g1 = document.createElement('optgroup'); g1.label = 'Accent';
+  ACCENTS.filter(([l]) => !voices.length || l === 'zh-CN' || have(l)).forEach(([l, name]) => {
+    const o = document.createElement('option'); o.value = 'auto:' + l; o.textContent = name; g1.appendChild(o);
+  });
+  sel.appendChild(g1);
+  const list = voices.filter(isAsian).sort((a, b) => normLang(a.lang).localeCompare(normLang(b.lang)) || a.name.localeCompare(b.name));
+  if (list.length) {
+    const g2 = document.createElement('optgroup'); g2.label = 'Voices on this device';
+    list.forEach(v => { const o = document.createElement('option'); o.value = v.voiceURI; o.textContent = `${v.name} (${v.lang})`; g2.appendChild(o); });
+    sel.appendChild(g2);
+  }
+  const want = S.settings.voiceURI || 'auto:zh-CN';
+  sel.value = [...sel.options].some(o => o.value === want) ? want : 'auto:zh-CN';
   const v = pickVoice();
   hint.textContent = !voices.length ? 'Voices are still loading. Open Settings again in a moment.'
-    : !voices.some(isZh) ? 'This device has no Chinese voice, so the default voice is used.'
-    : `Names are read by ${v ? v.name : 'a Chinese voice'}, in English.`;
+    : !v ? 'This device has no voice for that accent, so its default voice is used.'
+    : `Names are read by ${v.name}. A player with their own sound plays that instead.`;
 }
 function renderStats(){
   const tb = $('#statsBody'); tb.textContent = '';
@@ -1308,7 +1502,11 @@ $('#vol').addEventListener('input', e => { S.settings.volume = e.target.value / 
 $('#vol').addEventListener('change', () => { unlock(); play('tick', 6, true); });
 ['sWhip', 'sWarn', 'sCount', 'sUp', 'sSay'].forEach(k => $('#' + k).addEventListener('change', e => { S.settings[k] = e.target.checked; save(); }));
 const samplePlayer = () => activeP() || pickNext() || S.players[0] || { name: 'Alex' };
-$('#voiceSel').addEventListener('change', e => { S.settings.voiceURI = e.target.value; save(); fillVoices(); unlock(); sayTurn(samplePlayer(), true); });
+$('#voiceSel').addEventListener('change', e => {
+  S.settings.voiceURI = e.target.value; save(); fillVoices(); unlock();
+  try { if (TTS) TTS.cancel(); } catch (_) {}
+  speakName(samplePlayer());
+});
 $('#facing').addEventListener('change', e => { S.settings.facing = e.target.checked; layoutPlayers(); save(); });
 $('#wake').addEventListener('change', e => { S.settings.wake = e.target.checked; if (e.target.checked) { if (S.running) wake(); } else unwake(); save(); });
 document.querySelectorAll('.test').forEach(b => {
@@ -1317,7 +1515,7 @@ document.querySelectorAll('.test').forEach(b => {
     unlock();
     const k = b.dataset.test;
     if (k === 'warn') { play('warn60', null, true); setTimeout(() => play('warn30', null, true), 1500); }
-    else if (k === 'say') sayTurn(samplePlayer(), true);
+    else if (k === 'say') announce(samplePlayer(), true);
     else if (k === 'count') { [5, 4, 3, 2, 1].forEach((n, i) => setTimeout(() => play('tick', n, true), i * 1000)); setTimeout(() => play('up', null, true), 5000); }
     else play(k, null, true);
   });
@@ -1397,6 +1595,55 @@ const hot = window.claude && window.claude.hot;
 if (hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
 })();
 </script>
-<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+<script>
+// Offline cache, plus an update check: when the app is opened or brought back to the front, compare
+// this copy's build id with the live one. If it changed, reload once no clock is running, no dialog
+// is open and setup is not showing. Players and settings are saved before the page reloads.
+(function () {
+  if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
+  var reg = null;
+  navigator.serviceWorker.register('sw.js').then(function (r) { reg = r; }).catch(function () {});
+  var meta = document.querySelector('meta[name="tt-build"]');
+  var mine = meta && meta.content, pending = false, lastCheck = 0, waitTimer = 0;
+  try {
+    if (sessionStorage.getItem('tt-updated')) {
+      sessionStorage.removeItem('tt-updated');
+      setTimeout(function () {
+        var t = document.getElementById('toast'); if (!t) return;
+        t.textContent = 'Table Timer was updated.'; t.classList.add('show');
+        setTimeout(function () { t.classList.remove('show'); }, 2600);
+      }, 700);
+    }
+  } catch (e) {}
+  function idle() {
+    return !document.querySelector('.player.running') && !document.querySelector('dialog[open]') && !document.querySelector('#stage.setup');
+  }
+  function reloadWhenIdle() {
+    clearTimeout(waitTimer);
+    if (document.visibilityState !== 'visible') return;
+    if (idle()) { try { sessionStorage.setItem('tt-updated', '1'); } catch (e) {} location.reload(); }
+    else waitTimer = setTimeout(reloadWhenIdle, 4000);
+  }
+  function check() {
+    if (!mine || document.visibilityState !== 'visible') return;
+    if (pending) { reloadWhenIdle(); return; }
+    var now = Date.now();
+    if (now - lastCheck < 60000) return;
+    lastCheck = now;
+    if (reg) reg.update().catch(function () {});
+    fetch('./', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.text() : ''; })
+      .then(function (html) {
+        var m = /<meta name="tt-build" content="([^"]+)"/.exec(html);
+        if (m && m[1] !== mine) { pending = true; reloadWhenIdle(); }
+      })
+      .catch(function () {});
+  }
+  document.addEventListener('visibilitychange', check);
+  window.addEventListener('focus', check);
+  setTimeout(check, 3000);
+  setInterval(check, 30 * 60 * 1000);
+})();
+</script>
 </body>
 </html>

@@ -14,5 +14,8 @@ Player names and photos are saved only on the phone.
 
 ## Updating
 
-`index.html` is generated from `tabletop-timer.html` by `build-iphone-app.sh` (kept outside this repository).
-After replacing `index.html`, change `VERSION` in `sw.js` (for example to `table-timer-v2`) so phones load the new copy.
+Installed copies check for a new version when they are opened or brought back to the front, and reload
+by themselves once no clock is running.
+
+`index.html` is generated from `tabletop-timer.html` by `build-iphone-app.sh` (kept outside this repository),
+which also stamps the build id the update check compares. Change `VERSION` in `sw.js` when the cached files change.
