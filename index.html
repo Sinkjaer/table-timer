@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Table Timer">
 <meta name="theme-color" content="#120e0b">
-<meta name="tt-build" content="d8840ed508cd">
+<meta name="tt-build" content="89e24011f651">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -227,11 +227,6 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
 .link{background:none;border:0;color:var(--brass-hi);font:600 13px/1 var(--f-body);padding:6px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .link:disabled{opacity:.35;cursor:default;text-decoration:none}
 .hint{margin:0;font:400 13px/1.45 var(--f-body);color:var(--muted)}
-.clip{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.btn.rec{display:inline-flex;align-items:center;gap:7px}
-.rec-dot{width:10px;height:10px;border-radius:50%;background:var(--bad)}
-.btn.rec.on{background:var(--bad);border-color:var(--bad);color:#fff}
-.btn.rec.on .rec-dot{background:#fff;animation:blink 1s steps(2,jump-none) infinite}
 .sheet-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .btn{border-radius:10px;padding:11px 16px;font:600 15px/1 var(--f-body);border:1px solid var(--line);background:var(--panel-2);color:var(--text);cursor:pointer}
 .btn.primary{background:var(--brass);color:var(--brass-ink);border-color:var(--brass)}
@@ -347,17 +342,6 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
       </div>
     </div>
     <p class="hint">The second photo replaces the first after a long press, when this player is done for the round. You can also drop an image file straight onto a circle.</p>
-    <div class="field">
-      <span class="flabel">Name sound</span>
-      <div class="clip">
-        <button type="button" class="btn sm rec" id="pRec"><span class="rec-dot" aria-hidden="true"></span><span id="pRecLabel">Record</span></button>
-        <button type="button" class="btn sm" id="pClipUp">Upload</button>
-        <button type="button" class="btn sm" id="pClipPlay">Play</button>
-        <button type="button" class="link" id="pClipDel">Remove</button>
-      </div>
-      <input type="file" id="pClip" accept="audio/*" hidden>
-      <p class="hint" id="pClipHint"></p>
-    </div>
     <footer class="sheet-foot"><button type="button" class="btn danger" id="pRemove">Remove player</button><button class="btn primary" value="ok">Done</button></footer>
   </form>
 </dialog>
@@ -413,10 +397,10 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
       <label class="row first"><span>Sound</span><input type="checkbox" class="switch" id="sOn"></label>
       <label class="row" id="silentRow"><span>Play sounds when iPhone is on silent</span><input type="checkbox" class="switch" id="sSilent"></label>
       <label class="row"><span>Volume</span><input type="range" id="vol" min="0" max="100" step="5"></label>
-      <div class="row" id="sayRow"><label for="sSay">Announce each player when their turn starts</label><span class="row-r"><button type="button" class="test" data-test="say" aria-label="Hear an announcement"></button><input type="checkbox" class="switch" id="sSay"></span></div>
+      <div class="row" id="sayRow"><label for="sSay">Read the player's name when their turn starts</label><span class="row-r"><button type="button" class="test" data-test="say" aria-label="Hear a name read aloud"></button><input type="checkbox" class="switch" id="sSay"></span></div>
       <label class="row" id="voiceRow"><span>Accent</span><select id="voiceSel"></select></label>
       <p class="hint" id="voiceHint"></p>
-      <div class="row"><label for="sWhip">Whip crack when announcing is off</label><span class="row-r"><button type="button" class="test" data-test="whip" aria-label="Play the whip sound"></button><input type="checkbox" class="switch" id="sWhip"></span></div>
+      <div class="row"><label for="sWhip">Whip crack when names are off</label><span class="row-r"><button type="button" class="test" data-test="whip" aria-label="Play the whip sound"></button><input type="checkbox" class="switch" id="sWhip"></span></div>
       <div class="row"><label for="sWarn">Chime at 60 and 30 seconds left</label><span class="row-r"><button type="button" class="test" data-test="warn" aria-label="Play the warning chimes"></button><input type="checkbox" class="switch" id="sWarn"></span></div>
       <div class="row"><label for="sCount">Tick every second from 10</label><span class="row-r"><button type="button" class="test" data-test="count" aria-label="Play the countdown"></button><input type="checkbox" class="switch" id="sCount"></span></div>
       <div class="row"><label for="sUp">Wrong-answer buzzer at zero</label><span class="row-r"><button type="button" class="test" data-test="up" aria-label="Play the buzzer"></button><input type="checkbox" class="switch" id="sUp"></span></div>
@@ -508,7 +492,7 @@ function load(data){
     Object.assign(base.settings, d.settings || {});
     if (!base.settings.voiceURI) base.settings.voiceURI = 'auto:zh-CN';
     base.players = d.players.slice(0, MAX_PLAYERS).map(p => Object.assign(
-      { id: uid(), name: 'Player', color: COLORS[0], x: null, y: null, img: null, doneImg: null, sound: null, soundDur: 0, remaining: NaN, total: 0, turns: 0, done: false }, p));
+      { id: uid(), name: 'Player', color: COLORS[0], x: null, y: null, img: null, doneImg: null, remaining: NaN, total: 0, turns: 0, done: false }, p));
     // One-time move to the new default clock (chess clock, 3 min) for a phone still on the old
     // untouched default (1-minute turn timer) with no turns played yet.
     const old = d.settings || {};
@@ -528,7 +512,6 @@ function serial(){
   return {
     v: 1, settings: S.settings,
     players: S.players.map(p => ({ id: p.id, name: p.name, color: p.color, x: p.x, y: p.y, img: p.img, doneImg: p.doneImg,
-                                   sound: p.sound || null, soundDur: p.soundDur || 0,
                                    remaining: p.remaining, total: p.total, turns: p.turns, done: p.done })),
     activeId: S.activeId, lastId: S.lastId, round: S.round
   };
@@ -540,7 +523,7 @@ function save(){
   catch (e) {
     if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
       if (!warnedQuota) { warnedQuota = true; toast('The photos and sounds are too large to keep on this device. They stay until you close the page.'); }
-      try { const lite = serial(); lite.players.forEach(p => { p.img = null; p.doneImg = null; p.sound = null; p.soundDur = 0; }); localStorage.setItem(KEY, JSON.stringify(lite)); } catch (_) {}
+      try { const lite = serial(); lite.players.forEach(p => { p.img = null; p.doneImg = null; }); localStorage.setItem(KEY, JSON.stringify(lite)); } catch (_) {}
     }
   }
 }
@@ -689,14 +672,11 @@ function unlock(){
   const c = audio(); if (!c || unlocked) return;
   unlocked = true;
   try { const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
-  // iPhone only lets a page speak after it has spoken once inside a tap; say nothing, silently.
-  try { if (TTS) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; TTS.speak(u); } } catch (e) {}
-  S.players.forEach(p => { if (p.sound) clipBuffer(p).catch(() => {}); });
 }
 
 /* ---------- spoken turn announcements ---------- */
 const TTS = 'speechSynthesis' in window ? window.speechSynthesis : null;
-let voices = [], sayTimer = 0;
+let voices = [];
 function loadVoices(){
   try { voices = TTS ? TTS.getVoices() : []; } catch (e) { voices = []; }
   if (document.getElementById('dlgSettings').open) fillVoices();
@@ -717,7 +697,8 @@ function accentLang(){
 }
 function pickVoice(){
   const want = S.settings.voiceURI || 'auto:zh-CN';
-  if (!want.startsWith('auto:')) { const v = voices.find(x => x.voiceURI === want); if (v) return v; }
+  // A specific voice counts only if it is Asian (an English voice saved by an older version is ignored).
+  if (!want.startsWith('auto:')) { const v = voices.find(x => x.voiceURI === want); if (v && isAsian(v)) return v; }
   const lang = normLang(want.startsWith('auto:') ? want.slice(5) : 'zh-CN');
   const exact = voices.filter(v => normLang(v.lang) === lang);
   const pool = exact.length ? exact : voices.filter(v => normLang(v.lang).slice(0, 2) === lang.slice(0, 2));
@@ -729,91 +710,22 @@ function speakName(p){
   const u = new SpeechSynthesisUtterance(p.name);
   const v = pickVoice();
   if (v) { u.voice = v; u.lang = v.lang; } else u.lang = accentLang() || 'zh-CN';
-  u.volume = Math.min(1, S.settings.volume + 0.15); u.rate = 0.9;
+  const vol = S.settings.volume;
+  u.volume = vol > 0 ? Math.min(1, vol + 0.15) : 0; u.rate = 0.9;
+  // After speaking, wake the app's own sounds again in case iPhone paused them for the voice.
+  u.onend = u.onerror = () => { try { if (A.ctx && A.ctx.state !== 'running') A.ctx.resume().catch(() => {}); } catch (e) {} };
   try { TTS.speak(u); return true; } catch (e) { return false; }
 }
-// What plays when a turn starts: the player's own sound, else their name read aloud, else the whip.
-let annTok = 0;
+// What plays when a turn starts: the name read aloud, or the whip when names are off.
 function announce(p, force){
   const s = S.settings;
   if (!p || (!force && !s.sound)) return;
-  const tok = ++annTok;
-  try { if (TTS) TTS.cancel(); } catch (e) {}
-  stopClip();
-  if (force || s.sSay) {
-    if (p.sound) { playClip(p, tok); return; }
-    if (speakName(p)) return;
-  }
+  // Only touch speech when it is in use: on iPhone, speech can pause the app's other sounds.
+  try { if (TTS && (TTS.speaking || TTS.pending)) TTS.cancel(); } catch (e) {}
+  if ((force || s.sSay) && speakName(p)) return;
   play('whip', null, force);
 }
 
-/* ---------- each player's own name sound (recorded or uploaded) ---------- */
-const CLIP_RATE = 16000, CLIP_MAX = 4;
-const clipCache = new Map();
-let clipSrc = null;
-function dataUrlBytes(url){
-  const b = atob(url.slice(url.indexOf(',') + 1)), a = new Uint8Array(b.length);
-  for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i);
-  return a;
-}
-function decodeAudio(c, ab){
-  return new Promise((res, rej) => { const r = c.decodeAudioData(ab, res, rej); if (r && r.then) r.then(res, rej); });
-}
-async function clipBuffer(p){
-  const c = audio(); if (!c || !p.sound) return null;
-  const hit = clipCache.get(p.id);
-  if (hit && hit.src === p.sound) return hit.buf;
-  const buf = await decodeAudio(c, dataUrlBytes(p.sound).buffer);
-  clipCache.set(p.id, { src: p.sound, buf });
-  return buf;
-}
-async function playClip(p, tok){
-  try {
-    const buf = await clipBuffer(p);
-    if (!buf || tok !== annTok) return;
-    const src = A.ctx.createBufferSource(), g = A.ctx.createGain();
-    src.buffer = buf; g.gain.value = 1.2; src.connect(g); g.connect(A.out); src.start();
-    clipSrc = src;
-  } catch (e) { if (tok === annTok && !speakName(p)) play('whip'); }
-}
-function stopClip(){ try { if (clipSrc) clipSrc.stop(); } catch (e) {} clipSrc = null; }
-// Turn any recording or sound file into a short, trimmed, level mono WAV that every browser can play.
-async function processClip(blob){
-  const c = audio(); if (!c) throw new Error('noaudio');
-  const buf = await decodeAudio(c, await blob.arrayBuffer());
-  const sr = buf.sampleRate, len = buf.length, chs = buf.numberOfChannels;
-  const mono = new Float32Array(len);
-  for (let k = 0; k < chs; k++) { const d = buf.getChannelData(k); for (let i = 0; i < len; i++) mono[i] += d[i] / chs; }
-  let peak = 0; for (let i = 0; i < len; i++) { const v = Math.abs(mono[i]); if (v > peak) peak = v; }
-  if (peak < 0.004) throw new Error('silent');
-  const thr = Math.max(0.01, peak * 0.06);
-  let a = 0, b = len - 1;
-  while (a < len && Math.abs(mono[a]) < thr) a++;
-  while (b > a && Math.abs(mono[b]) < thr) b--;
-  a = Math.max(0, a - Math.round(0.04 * sr));
-  b = Math.min(len - 1, b + Math.round(0.15 * sr));
-  const cut = mono.subarray(a, Math.min(b + 1, a + Math.round(CLIP_MAX * sr)));
-  const n = Math.max(1, Math.round(cut.length * CLIP_RATE / sr)), out = new Float32Array(n), gain = 0.9 / peak;
-  for (let i = 0; i < n; i++) {
-    const x = i * sr / CLIP_RATE, i0 = Math.floor(x), f = x - i0, s0 = cut[i0] || 0, s1 = i0 + 1 < cut.length ? cut[i0 + 1] : s0;
-    out[i] = (s0 + (s1 - s0) * f) * gain;
-  }
-  const fade = Math.min(n >> 1, Math.round(0.01 * CLIP_RATE));
-  for (let i = 0; i < fade; i++) { out[i] *= i / fade; out[n - 1 - i] *= i / fade; }
-  return { url: wavDataUrl(out, CLIP_RATE), dur: n / CLIP_RATE };
-}
-function wavDataUrl(s, rate){
-  const n = s.length, ab = new ArrayBuffer(44 + n * 2), v = new DataView(ab);
-  const w = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
-  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
-  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-  w(36, 'data'); v.setUint32(40, n * 2, true);
-  for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.round(Math.max(-1, Math.min(1, s[i])) * 0x7fff), true);
-  const bytes = new Uint8Array(ab); let bin = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  return 'data:audio/wav;base64,' + btoa(bin);
-}
 function env(t, peak, attack, decay){
   const n = A.ctx.createGain();
   n.gain.setValueAtTime(0.0001, t);
@@ -867,7 +779,11 @@ function play(name, arg, force){
   const s = S.settings;
   if (!force && (!s.sound || (SOUND_FLAG[name] && !s[SOUND_FLAG[name]]))) return;
   const c = audio(); if (!c || !A.out) return;
-  try { SFX[name](c.currentTime + 0.02, arg); } catch (e) {}
+  const go = () => { try { SFX[name](c.currentTime + 0.02, arg); } catch (e) {} };
+  // iPhone can leave the audio paused ("suspended" or "interrupted", e.g. after speech or a call);
+  // wake it first and only then schedule the sound, so it is not lost.
+  if (c.state === 'running') go();
+  else c.resume().then(go, () => {});
 }
 
 /* ---------- screen wake ---------- */
@@ -1258,7 +1174,7 @@ function openEditor(id, fresh){
   const p = byId(id); if (!p) return;
   editId = id;
   $('#pName').value = p.name;
-  renderSwatches(p); renderSlots(p); renderClipUI(); disarmRemove();
+  renderSwatches(p); renderSlots(p); disarmRemove();
   if (!dlgP.open) dlgP.showModal();
   if (fresh) { const n = $('#pName'); n.focus(); n.select(); }
 }
@@ -1281,82 +1197,12 @@ $('#pRemove').addEventListener('click', () => {
   clearTimeout(removeArmed); disarmRemove();
   removePlayer(p.id); dlgP.close();
 });
-dlgP.addEventListener('close', () => { stopRecording(true); editId = null; clearTimeout(removeArmed); disarmRemove(); save(); });
+dlgP.addEventListener('close', () => { editId = null; clearTimeout(removeArmed); disarmRemove(); save(); });
 
-/* ---------- turn sound: record or upload ---------- */
-// Recording needs the microphone, which a page shown inside Claude is not given; the home-screen app has it.
-const canRecord = () => !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder) && window.top === window.self;
-let rec = null;
-function renderClipUI(){
-  const p = byId(editId); if (!p) return;
-  const recOK = canRecord();
-  $('#pRec').hidden = !recOK;
-  $('#pRec').classList.toggle('on', !!rec);
-  $('#pRecLabel').textContent = rec ? `Stop (${((Date.now() - rec.startedAt) / 1000).toFixed(1)} s)` : 'Record';
-  $('#pClipDel').disabled = !p.sound;
-  const what = rec ? `Recording. Say the name; it stops by itself after ${CLIP_MAX} seconds.`
-    : p.sound ? `This sound (${p.soundDur.toFixed(1)} s) plays instead of the read-aloud name when ${p.name}'s turn starts.`
-    : `No sound yet, so the name is read aloud. Record the name, or upload a sound file of it (up to ${CLIP_MAX} seconds are used).`;
-  $('#pClipHint').textContent = recOK ? what : what + ' Recording works in the home-screen app; here you can upload a sound file.';
-}
-async function setClip(id, blob){
-  try {
-    const { url, dur } = await processClip(blob);
-    const p = byId(id); if (!p) return;
-    p.sound = url; p.soundDur = dur; clipCache.delete(id);
-    save(); renderClipUI();
-    announce(p, true);
-  } catch (e) {
-    toast(e && e.message === 'silent' ? 'That sound was silent. Try again closer to the phone.' : "That sound couldn't be used. Try an M4A, MP3 or WAV file.");
-  }
-}
-async function startRecording(){
-  if (rec) { stopRecording(); return; }
-  const id = editId; if (!id) return;
-  unlock();
-  let stream;
-  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
-  catch (e) {
-    toast(e && e.name === 'NotAllowedError'
-      ? 'Microphone access was refused. Allow it for this site in Settings, or upload a sound instead.'
-      : 'The microphone could not start. Upload a sound instead.');
-    return;
-  }
-  const type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
-  let mr;
-  try { mr = new MediaRecorder(stream, type ? { mimeType: type } : undefined); }
-  catch (e) { stream.getTracks().forEach(t => t.stop()); toast('Recording is not supported here. Upload a sound instead.'); return; }
-  const chunks = [];
-  mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-  mr.onstop = () => {
-    stream.getTracks().forEach(t => t.stop());
-    applyAudioSession();
-    const r = rec; rec = null; renderClipUI();
-    if (!r || r.cancelled || !chunks.length) return;
-    setClip(r.id, new Blob(chunks, { type: mr.mimeType || type || 'audio/mp4' }));
-  };
-  rec = { mr, id, startedAt: Date.now(), cancelled: false,
-          timer: setTimeout(() => stopRecording(), CLIP_MAX * 1000 + 300), tick: setInterval(renderClipUI, 200) };
-  try { mr.start(); } catch (e) { stopRecording(true); toast('Recording could not start. Upload a sound instead.'); return; }
-  renderClipUI();
-}
-function stopRecording(cancel){
-  if (!rec) return;
-  clearTimeout(rec.timer); clearInterval(rec.tick);
-  if (cancel) rec.cancelled = true;
-  try { if (rec.mr.state !== 'inactive') rec.mr.stop(); else { rec = null; } } catch (e) { rec = null; }
-  renderClipUI();
-}
-$('#pRec').addEventListener('click', startRecording);
-$('#pClipUp').addEventListener('click', () => $('#pClip').click());
-$('#pClip').addEventListener('change', e => { const f = e.target.files[0]; if (f && editId) setClip(editId, f); e.target.value = ''; });
-$('#pClipPlay').addEventListener('click', () => { unlock(); const p = byId(editId); if (p) announce(p, true); });
-$('#pClipDel').addEventListener('click', () => { const p = byId(editId); if (!p) return; p.sound = null; p.soundDur = 0; clipCache.delete(p.id); save(); renderClipUI(); });
 function removePlayer(id){
   const i = S.players.findIndex(p => p.id === id); if (i < 0) return;
   const [p] = S.players.splice(i, 1);
   if (p._el) p._el.remove();
-  clipCache.delete(id);
   if (S.activeId === id) { S.activeId = null; S.running = false; }
   if (S.lastId === id) S.lastId = null;
   renderAll(); save();
@@ -1398,7 +1244,8 @@ function syncSettings(){
   $('#incRow').hidden = s.mode !== 'bank'; $('#inc').value = s.incSec;
   $('#dCw').checked = s.dir !== 'ccw'; $('#dCcw').checked = s.dir === 'ccw';
   $('#sOn').checked = s.sound; $('#vol').value = Math.round(s.volume * 100);
-  const canSession = !!navigator.audioSession;
+  // The audio session can only be changed by a top-level page (inside Claude the frame has no microphone).
+  const canSession = !!navigator.audioSession && window.top === window.self;
   $('#silentRow').hidden = !canSession; $('#sSilent').checked = !!s.sSilent;
   $('#silentHint').textContent = canSession
     ? 'With silent play on, the timer can pause music playing in another app.'
@@ -1410,7 +1257,7 @@ function syncSettings(){
 }
 function fillVoices(){
   const sel = $('#voiceSel'), hint = $('#voiceHint');
-  if (!TTS) { hint.textContent = 'This browser cannot read names aloud. Players with their own sound still play it.'; return; }
+  if (!TTS) { hint.textContent = 'This browser cannot read names aloud, so the whip plays instead.'; return; }
   const have = l => voices.some(v => normLang(v.lang) === normLang(l));
   sel.textContent = '';
   const g1 = document.createElement('optgroup'); g1.label = 'Accent';
@@ -1426,10 +1273,12 @@ function fillVoices(){
   }
   const want = S.settings.voiceURI || 'auto:zh-CN';
   sel.value = [...sel.options].some(o => o.value === want) ? want : 'auto:zh-CN';
+  // Once voices are known, drop a saved voice that is not offered (for example an English one).
+  if (voices.length && sel.value !== want) { S.settings.voiceURI = sel.value; save(); }
   const v = pickVoice();
   hint.textContent = !voices.length ? 'Voices are still loading. Open Settings again in a moment.'
     : !v ? 'This device has no voice for that accent, so its default voice is used.'
-    : `Names are read by ${v.name}. A player with their own sound plays that instead.`;
+    : `Names are read by ${v.name}.`;
 }
 function renderStats(){
   const tb = $('#statsBody'); tb.textContent = '';
