@@ -850,6 +850,26 @@ function layoutPlayers(){
   if (!G.W) return;
   ensureSeats();
   S.players.forEach(placePlayer);
+  // Seats chosen at another screen size or orientation can land on the box; move those aside.
+  S.players.forEach(p => { if (clearOfBox(p)) placePlayer(p); });
+}
+// Keep Pause and Next reachable: a seat that sits on the box slides to the nearest free spot on the
+// rim, away from other players where possible. Returns true if it moved.
+function clearOfBox(p){
+  if (!G.W || !validPos(p)) return false;
+  const here = { x: p.x * G.W, y: p.y * G.H };
+  if (!hitsBox(here)) return false;
+  const free = rimPoints(0, true).pts.map(f => f.pt);
+  if (!free.length) return false;
+  const others = S.players.filter(q => q !== p && validPos(q)).map(q => ({ x: q.x * G.W, y: q.y * G.H }));
+  const roomy = free.filter(pt => others.every(o => Math.hypot(o.x - pt.x, o.y - pt.y) > G.D + 4));
+  let best = null, bd = Infinity;
+  for (const pt of (roomy.length ? roomy : free)) {
+    const d = Math.hypot(pt.x - here.x, pt.y - here.y);
+    if (d < bd) { bd = d; best = pt; }
+  }
+  p.x = best.x / G.W; p.y = best.y / G.H;
+  return true;
 }
 const MANAGED = ['active', 'running', 'paused', 'done', 'low', 'crit', 'final', 'over', 'has-img', 'has-done-img'];
 function renderDynamic(){
@@ -920,7 +940,11 @@ function bindPress(el, id){
     if (!pr || e.pointerId !== pr.pid) return;
     clearTimeout(pr.t); el.classList.remove('pressing', 'dragging');
     const was = pr; pr = null;
-    if (was.moved) { save(); return; }
+    if (was.moved) {
+      const p = byId(id);
+      if (p && clearOfBox(p)) { placePlayer(p); toast('Moved next to the box so Pause and Next stay free.'); }
+      save(); return;
+    }
     if (was.long || cancelled) return;
     tapPlayer(id);
   };
