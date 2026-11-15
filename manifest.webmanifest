@@ -1,0 +1,16 @@
+{
+  "name": "Tabletop Turn Timer",
+  "short_name": "Table Timer",
+  "description": "A turn timer for board games, for up to six players around the table.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#120e0b",
+  "theme_color": "#120e0b",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
