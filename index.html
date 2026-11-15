@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Table Timer">
 <meta name="theme-color" content="#120e0b">
-<meta name="tt-build" content="e14f852d2d93">
+<meta name="tt-build" content="d8840ed508cd">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -348,7 +348,7 @@ input:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
     </div>
     <p class="hint">The second photo replaces the first after a long press, when this player is done for the round. You can also drop an image file straight onto a circle.</p>
     <div class="field">
-      <span class="flabel">Turn sound</span>
+      <span class="flabel">Name sound</span>
       <div class="clip">
         <button type="button" class="btn sm rec" id="pRec"><span class="rec-dot" aria-hidden="true"></span><span id="pRecLabel">Record</span></button>
         <button type="button" class="btn sm" id="pClipUp">Upload</button>
@@ -1295,8 +1295,8 @@ function renderClipUI(){
   $('#pRecLabel').textContent = rec ? `Stop (${((Date.now() - rec.startedAt) / 1000).toFixed(1)} s)` : 'Record';
   $('#pClipDel').disabled = !p.sound;
   const what = rec ? `Recording. Say the name; it stops by itself after ${CLIP_MAX} seconds.`
-    : p.sound ? `${p.name}'s own sound (${p.soundDur.toFixed(1)} s) plays when their turn starts.`
-    : `No sound yet, so the name is read aloud. ${recOK ? 'Record' : 'Upload'} up to ${CLIP_MAX} seconds to use instead.`;
+    : p.sound ? `This sound (${p.soundDur.toFixed(1)} s) plays instead of the read-aloud name when ${p.name}'s turn starts.`
+    : `No sound yet, so the name is read aloud. Record the name, or upload a sound file of it (up to ${CLIP_MAX} seconds are used).`;
   $('#pClipHint').textContent = recOK ? what : what + ' Recording works in the home-screen app; here you can upload a sound file.';
 }
 async function setClip(id, blob){
